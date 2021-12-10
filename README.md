@@ -1,12 +1,12 @@
 # pegsocket.js - WebSocket driver for PostgreSQL
 
-For making SQL queries directly from the browser to database. Because why not!
+For making SQL queries directly from the browser to a pg database. Because why not!
 
 ## Usage:
 ```js
 import pegsocket from './pegsocket.js'
 
-const pg = await pegsocket({ url: 'ws://example.com:15432', database: 'web', 'user': 'browser' });
+const pg = await pegsocket({ url: 'ws://example.com:15432', database: 'web', user: 'browser' });
 const result = await pg.query("select 'Hello ' || $1 || '!' msg", ['world']);
 => {rows:[  {msg: "Hello world!"} ]," updated": 0 }
 ```
