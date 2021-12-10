@@ -8,7 +8,7 @@ import pegsocket from './pegsocket.js'
 
 const pg = await pegsocket({ url: 'ws://example.com:15432', database: 'web', user: 'browser' });
 const result = await pg.query("select 'Hello ' || $1 || '!' msg", ['world']);
-=> {rows:[  {msg: "Hello world!"} ]," updated": 0 }
+=> { rows:[  {msg: "Hello world!"} ], updated: 0 }
 ```
 
 ## PostgreSQL server configuration
