@@ -14,4 +14,4 @@ const result = await pg.query("select 'Hello ' || $1 || '!' msg", ['world']);
 ## PostgreSQL server configuration
 
  * Expose pg port as WebSocket endpoint with e.g., [websockify](https://github.com/novnc/websockify).
- * Configure trust authentication for a db user in ```pg_hba.conf```.
+ * Configure scram-sha-256 or trust authentication for a db user in ```pg_hba.conf```.
