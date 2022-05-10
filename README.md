@@ -8,10 +8,10 @@ import pegsocket from './pegsocket.js'
 
 const pg = await pegsocket({ url: 'ws://example.com:15432', database: 'web', user: 'browser' });
 const result = await pg.query("select 'Hello ' || $1 || '!' msg", ['world']);
-=> { rows:[  {msg: "Hello world!"} ], updated: 0 }
+=> { rows:[{ msg: "Hello world!" }], updated: 0 }
 ```
 
 ## PostgreSQL server configuration
 
- * Expose pg port as WebSocket endpoint with e.g., [websockify](https://github.com/novnc/websockify).
+ * Expose pg port as WebSocket endpoint with e.g., [pg_websocket](https://github.com/alaisi/pg_websocket).
  * Configure scram-sha-256 or trust authentication for a db user in ```pg_hba.conf```.

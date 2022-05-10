@@ -212,23 +212,23 @@ const protocol = (() => {
             backlog.compact();
         }
     }
-    const writeStartup = async (database, user) => {
+    const writeStartup = (database, user) => {
         const msg = buffer(47 + database.length + user.length);
         msg.writeUint32(0);
         msg.writeUint32(196608);
-        ['client_encoding', 'UTF-8', 'database', database, 'user', user, ''].forEach(msg.writeString);
+        ['client_encoding', 'UTF-8', 'database', database, 'user', user || '', ''].forEach(msg.writeString);
         const packet = msg.trim();
         new DataView(packet).setUint32(0, packet.byteLength);
         return packet;
     }
-    const writeQuery = async (sql) => {
+    const writeQuery = (sql) => {
         const msg = buffer(sql.length + 6);
         msg.writeUint8('Q'.charCodeAt(0));
         msg.writeUint32(0);
         msg.writeString(sql);
         return msg.toPacket();
     }
-    const writeParse = async (sql, paramCount) => {
+    const writeParse = (sql, paramCount) => {
         const msg = buffer(sql.length + 9 + 4*paramCount);
         msg.writeUint8('P'.charCodeAt(0));
         msg.writeUint32(0);
@@ -240,7 +240,7 @@ const protocol = (() => {
         }
         return msg.toPacket();
     }
-    const writeBind = async (params) => {
+    const writeBind = (params) => {
         const msg = buffer(64);
         msg.writeUint8('B'.charCodeAt(0));
         msg.writeUint32(0);
@@ -260,7 +260,7 @@ const protocol = (() => {
         msg.writeUint16(0);
         return msg.toPacket();
     }
-    const writeDescribe = async () => {
+    const writeDescribe = () => {
         const msg = buffer(7);
         msg.writeUint8('D'.charCodeAt(0));
         msg.writeUint32(0);
@@ -268,7 +268,7 @@ const protocol = (() => {
         msg.writeUint8(0);
         return msg.toPacket();
     }
-    const writeExecute = async () => {
+    const writeExecute = () => {
         const msg = buffer(10);
         msg.writeUint8('E'.charCodeAt(0));
         msg.writeUint32(0);
@@ -276,7 +276,7 @@ const protocol = (() => {
         msg.writeUint32(0);
         return msg.toPacket();
     }
-    const writeClose = async () => {
+    const writeClose = () => {
         const msg = buffer(7);
         msg.writeUint8('C'.charCodeAt(0));
         msg.writeUint32(0);
@@ -284,13 +284,13 @@ const protocol = (() => {
         msg.writeUint8(0);
         return msg.toPacket();
     }
-    const writeSync = async () => {
+    const writeSync = () => {
         const msg = buffer(5);
         msg.writeUint8('S'.charCodeAt(0));
         msg.writeUint32(0);
         return msg.toPacket();
     }
-    const writeScramClientFirst = async (clientFirst) => {
+    const writeScramClientFirst = (clientFirst) => {
         const msg = buffer(64);
         msg.writeUint8('p'.charCodeAt(0));
         msg.writeUint32(0);
@@ -300,7 +300,7 @@ const protocol = (() => {
         msg.writeBuf(bytes.buffer);
         return msg.toPacket();
     }
-    const writeScramClientFinal = async (clientFinal) => {
+    const writeScramClientFinal = (clientFinal) => {
         const msg = buffer(64);
         msg.writeUint8('p'.charCodeAt(0));
         msg.writeUint32(0);
@@ -457,14 +457,14 @@ const client = (send, close) => {
     return {
         close,
         async query(sql, params = null) {
-            const requests = await Promise.all(!params || params.length < 1
+            const requests = !params || params.length < 1
                 ? [protocol.writeQuery(sql)]
                 : [protocol.writeParse(sql, params.length),
                     protocol.writeBind(params),
                     protocol.writeDescribe(),
                     protocol.writeExecute(),
                     protocol.writeClose(),
-                    protocol.writeSync()]);
+                    protocol.writeSync()];
             const responses = await send(requests);
             const { rows, updated } = responses.reduce(toRows, {});
             return { rows: rows || [], updated: updated || 0 };
@@ -474,7 +474,7 @@ const client = (send, close) => {
 
 export default ({ url, database, user, password }) => {
     return new Promise((resolve, reject) => {
-        const socket = new WebSocket(url, ['binary']);
+        const socket = new WebSocket(url);
         socket.binaryType = 'arraybuffer';
         const callbacks = [];
         const recv = protocol.recv((msgs) => callbacks.shift(1)(msgs));
